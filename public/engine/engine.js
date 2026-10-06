@@ -833,7 +833,7 @@
         why: listTerms(group, 8) + ' appear in the job description but not in your resume. ATS filters and recruiters search for these exact terms.',
         how: ['If you genuinely have a skill, add it to Skills AND prove it in a bullet (a skill with no evidence is weighted lower).',
           'Use the job posting\'s exact wording (e.g. write "' + (group[0].jdForm || group[0].term) + '", not a synonym).',
-          'For skills you do not have, see the "Gaps" tab for an honest way to close or bridge each one.']
+          'For skills you do not have, open Keywords → "How to close gaps" for an honest way to close or bridge each one.']
       });
     }
     // 2. Skills-only keywords

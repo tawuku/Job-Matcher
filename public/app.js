@@ -240,7 +240,7 @@
     const r = current;
     setChips([{ id: 'v', label: r.verdict.text, static: true }], 'v', () => {});
     const cards = r.components.map((c) => {
-      const pos = Math.min(88, Math.max(12, c.score));
+      const pos = Math.min(80, Math.max(14, c.score));
       return '<div class="mcard tone-' + tone(c.score) + '"><div class="mcard-h"><div><h3>' + esc(c.label) + '</h3><small>' + c.weight + '% of score</small></div><div class="wbadge" title="Weight">' + c.weight + '%</div></div>' +
         '<div class="track"><div class="fill" data-w="' + c.score + '"></div><div class="thumb" data-l="' + pos + '" style="left:0">' + c.score + ' / 100</div></div><p>' + esc(c.detail) + '</p></div>';
     }).join('');
@@ -487,5 +487,13 @@
   if (d) { el.jd.value = d.jd || ''; el.title.value = d.title || ''; el.company.value = d.company || ''; }
   updateHints(); renderPills(); renderDock();
   if (location.hash === '#jobs') go('jobs');
+  // Shareable demo: /?demo=overview&theme=dark&accent=violet loads the sample and opens that tab.
+  const q = new URLSearchParams(location.search);
+  if (q.get('theme') === 'light' || q.get('theme') === 'dark') document.documentElement.setAttribute('data-theme', q.get('theme'));
+  if (['lime', 'mint', 'sky', 'violet', 'coral'].includes(q.get('accent'))) { document.documentElement.setAttribute('data-accent', q.get('accent')); markAccent(); }
+  if (q.has('demo')) {
+    const smp = window.JobMatcherSamples; el.resume.value = smp.resume; el.jd.value = smp.jd; el.company.value = 'Example Co'; updateHints();
+    if (q.get('demo') !== 'analyze') { run(); const t = q.get('demo'); if (PILLS.some((p) => p.r && p.id === t)) go(t); window.scrollTo(0, 0); }
+  }
   fetch('/api/status').then((r) => r.json()).then((s) => { aiAvailable = !!s.ai; }).catch(() => {});
 })();

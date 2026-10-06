@@ -7,6 +7,24 @@ Upload a job description and your resume. Job Matcher tells you **how well you f
 - Import your resume or the job posting by **pasting text**, **uploading** or **dragging & dropping** a **PDF**, **Word (.docx)** or text file. (Old `.doc` files: save as .docx or PDF first. Scanned/image PDFs have no text; export a text PDF.)
 - Day / night theme and five accent palettes (mint, sky, violet, coral, lime), switchable in the top bar. Your choices are remembered.
 
+## Previews
+
+Day and night themes, with switchable accent colours (all sample data is fictional).
+
+| Start (day, mint) | Overview (night, violet) |
+|---|---|
+| ![Start screen](docs/previews/input-day.png) | ![Overview, night](docs/previews/overview-night.png) |
+
+| Overview (day, mint) | Keywords (night, sky) |
+|---|---|
+| ![Overview, day](docs/previews/overview-day.png) | ![Keywords](docs/previews/keywords-night.png) |
+
+| Bullets / XYZ (day, coral) | Cover letter (day, mint) |
+|---|---|
+| ![Bullets](docs/previews/bullets-day.png) | ![Cover letter](docs/previews/cover-letter-day.png) |
+
+Try it without pasting anything: open `http://localhost:3000/?demo=overview&theme=dark&accent=violet` (tabs: `analyze`, `overview`, `keywords`, `bullets`, `ats`, `resume`, `letter`).
+
 ## Run it
 
 ```bash
