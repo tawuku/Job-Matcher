@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Job Matcher</title>
+  <meta name="description" content="Match your resume to a job description, see how well you fit, and get an ATS-aware plan to land the interview.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M9 17l5 5 9-12' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-in">
+      <a class="brand" href="#analyze" aria-label="Job Matcher home">
+        <span class="logo" aria-hidden="true"><svg viewBox="0 0 32 32" width="22" height="22"><path d="M9 17l5 5 9-12" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        Job Matcher
+      </a>
+      <nav class="nav" aria-label="Main">
+        <button class="nav-btn active" data-view="analyze">Analyze</button>
+        <button class="nav-btn" data-view="jobs">My jobs <span class="pill" id="jobCount">0</span></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- ===================== ANALYZE ===================== -->
+    <section id="view-analyze" class="view">
+      <div class="hero">
+        <h1>Will this resume get you the interview?</h1>
+        <p>Paste a job description and your resume. You get a match score, the exact keywords and metrics you are missing, and a plan built on how ATS software and recruiters actually screen. Everything is calculated in your browser.</p>
+      </div>
+
+      <div class="inputs">
+        <div class="card">
+          <div class="card-h">
+            <label for="resume"><span class="step">1</span> Your resume</label>
+            <div class="row">
+              <label class="btn small ghost file-btn">Upload <input id="resumeFile" type="file" accept=".txt,.md,.pdf,.docx" hidden></label>
+            </div>
+          </div>
+          <textarea id="resume" spellcheck="false" placeholder="Paste your resume text here, or upload a PDF / DOCX / TXT. Include dates for each role and bullet points for achievements."></textarea>
+          <div class="hint" id="resumeHint">0 words</div>
+        </div>
+
+        <div class="card">
+          <div class="card-h">
+            <label for="jd"><span class="step">2</span> Job description</label>
+            <div class="row">
+              <label class="btn small ghost file-btn">Upload <input id="jdFile" type="file" accept=".txt,.md,.pdf,.docx" hidden></label>
+            </div>
+          </div>
+          <div class="two">
+            <input id="jobTitle" type="text" placeholder="Job title (optional, auto-detected)" aria-label="Job title">
+            <input id="company" type="text" placeholder="Company (optional)" aria-label="Company">
+          </div>
+          <textarea id="jd" spellcheck="false" placeholder="Paste the full job posting here: responsibilities, requirements and nice-to-haves. The more complete, the better the match."></textarea>
+          <div class="hint" id="jdHint">0 words</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary big" id="analyzeBtn">Analyze match</button>
+        <button class="btn ghost" id="sampleBtn">Try a sample</button>
+        <button class="btn ghost" id="clearBtn">Clear</button>
+        <span class="msg" id="inputMsg" role="status"></span>
+      </div>
+
+      <div id="results" hidden>
+        <section class="summary card" aria-live="polite">
+          <div class="ring-wrap">
+            <svg class="ring" viewBox="0 0 120 120" role="img" aria-label="Match score">
+              <circle cx="60" cy="60" r="52" class="ring-bg"/>
+              <circle cx="60" cy="60" r="52" class="ring-fg" id="ringFg" transform="rotate(-90 60 60)"/>
+            </svg>
+            <div class="ring-num"><b id="scoreNum">0</b><span>/100</span></div>
+          </div>
+          <div class="sum-body">
+            <div class="verdict" id="verdict"></div>
+            <p class="verdict-text" id="verdictText"></p>
+            <div class="chips" id="chips"></div>
+            <div class="sum-actions">
+              <button class="btn small" id="saveJobBtn">Save to My jobs</button>
+              <button class="btn small ghost" id="toPlanBtn">See what to fix ↓</button>
+            </div>
+          </div>
+          <div class="potential" id="potential"></div>
+        </section>
+
+        <section class="card">
+          <h2 class="h2">Score breakdown</h2>
+          <div id="bars" class="bars"></div>
+        </section>
+
+        <div class="tabs" role="tablist" id="tabs">
+          <button role="tab" class="tab active" data-tab="plan">Action plan</button>
+          <button role="tab" class="tab" data-tab="keywords">Keywords</button>
+          <button role="tab" class="tab" data-tab="gaps">Gaps</button>
+          <button role="tab" class="tab" data-tab="bullets">Bullets (XYZ)</button>
+          <button role="tab" class="tab" data-tab="ats">ATS check</button>
+          <button role="tab" class="tab" data-tab="tailor">Tailored resume</button>
+        </div>
+        <div id="tabpanel" class="card tabpanel" role="tabpanel"></div>
+      </div>
+    </section>
+
+    <!-- ===================== JOBS ===================== -->
+    <section id="view-jobs" class="view" hidden>
+      <div class="hero">
+        <h1>My jobs</h1>
+        <p>Every posting you save, scored against your current resume. Re-open one to re-analyze after you improve your resume. Data stays in this browser.</p>
+      </div>
+      <div class="card" id="jobsList"></div>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Scores are an estimate based on common ATS and recruiter screening signals, not a guarantee. Real ATS products differ. Be honest on your resume: only claim what you can back up in an interview.</p>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="engine/skills.js"></script>
+  <script src="engine/engine.js"></script>
+  <script src="engine/samples.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

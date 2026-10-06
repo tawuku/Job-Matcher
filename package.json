@@ -1,0 +1,12 @@
+{
+  "name": "job-matcher",
+  "version": "1.0.0",
+  "description": "Match your resume to a job description, see exactly how well you fit, and get an ATS-aware plan (XYZ bullets, keywords, format) to land the interview.",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/"
+  },
+  "engines": { "node": ">=18" },
+  "license": "MIT"
+}
