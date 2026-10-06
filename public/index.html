@@ -6,6 +6,11 @@
   <title>Job Matcher</title>
   <meta name="description" content="Match your resume to a job description, see how well you fit, and get an ATS-aware plan to land the interview.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M9 17l5 5 9-12' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <script>
+    (function () { var t = null; try { t = localStorage.getItem('jm:theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t); })();
+  </script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -13,12 +18,20 @@
     <div class="wrap top-in">
       <a class="brand" href="#analyze" aria-label="Job Matcher home">
         <span class="logo" aria-hidden="true"><svg viewBox="0 0 32 32" width="22" height="22"><path d="M9 17l5 5 9-12" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        Job Matcher
+        <span class="name">Job Matcher</span>
       </a>
+      <div class="top-r">
       <nav class="nav" aria-label="Main">
         <button class="nav-btn active" data-view="analyze">Analyze</button>
         <button class="nav-btn" data-view="jobs">My jobs <span class="pill" id="jobCount">0</span></button>
       </nav>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch between day and night theme" title="Day / night">
+        <span class="knob">
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a.6.6 0 0 0-.8-.7A9.5 9.5 0 1 0 21.2 15a.6.6 0 0 0-.7-.8z"/></svg>
+        </span>
+      </button>
+      </div>
     </div>
   </header>
 
@@ -68,7 +81,7 @@
       <div id="results" hidden>
         <section class="summary card" aria-live="polite">
           <div class="ring-wrap">
-            <svg class="ring" viewBox="0 0 120 120" role="img" aria-label="Match score">
+            <svg class="ring" viewBox="0 0 120 120" role="img" aria-label="Match score"><defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b5cf6"/><stop offset=".6" stop-color="#d946ef"/><stop offset="1" stop-color="#f97316"/></linearGradient></defs>
               <circle cx="60" cy="60" r="52" class="ring-bg"/>
               <circle cx="60" cy="60" r="52" class="ring-fg" id="ringFg" transform="rotate(-90 60 60)"/>
             </svg>
@@ -98,6 +111,7 @@
           <button role="tab" class="tab" data-tab="bullets">Bullets (XYZ)</button>
           <button role="tab" class="tab" data-tab="ats">ATS check</button>
           <button role="tab" class="tab" data-tab="tailor">Tailored resume</button>
+          <button role="tab" class="tab" data-tab="cover">Cover letter</button>
         </div>
         <div id="tabpanel" class="card tabpanel" role="tabpanel"></div>
       </div>

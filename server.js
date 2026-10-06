@@ -39,6 +39,9 @@ function buildPrompt(task, { resume, jd, analysis }) {
   if (task === 'bullets') {
     return `Rewrite these weak resume bullets using the XYZ formula, tailored to the job. Return ONLY a numbered list matching the input order, one rewritten bullet per line, no commentary.\n\nJOB DESCRIPTION:\n${jd}\n\n${keep}\n\nBULLETS:\n${(analysis.bullets || []).map((b, i) => `${i + 1}. ${b}`).join('\n')}`;
   }
+  if (task === 'cover') {
+    return `Write a concise, genuine cover letter (250-350 words, 3-4 short paragraphs, plain text) for this job. Open with specific interest in the role, prove fit with 2-3 real, quantified achievements taken from the resume, address the most important requirements, and close politely. Do not repeat the resume line by line. Use [BRACKETED PLACEHOLDERS] for anything the candidate must supply (company motivation, hiring manager name). Output ONLY the letter.\n\n${keep}\n${gaps}\n\nJOB DESCRIPTION:\n${jd}\n\nCANDIDATE RESUME:\n${resume}`;
+  }
   return `Rewrite the candidate's resume so it is tailored to the job posting below and scores well in ATS keyword matching and with human recruiters. Keep the candidate's real history; improve wording, ordering and keyword alignment. Output ONLY the finished resume text.\n\n${keep}\n${gaps}\n\nJOB DESCRIPTION:\n${jd}\n\nCANDIDATE RESUME:\n${resume}`;
 }
 
@@ -78,7 +81,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && url.pathname === '/api/ai') {
       if (!API_KEY) return send(res, 501, { error: 'AI is not configured. Start the server with ANTHROPIC_API_KEY set.' });
       const body = await readBody(req);
-      if (!['tailor', 'bullets'].includes(body.task) || typeof body.jd !== 'string') return send(res, 400, { error: 'Bad request' });
+      if (!['tailor', 'bullets', 'cover'].includes(body.task) || typeof body.jd !== 'string') return send(res, 400, { error: 'Bad request' });
       const text = await callAnthropic(body.task, { resume: String(body.resume || ''), jd: body.jd, analysis: body.analysis || {} });
       return send(res, 200, { text });
     }

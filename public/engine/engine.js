@@ -1077,7 +1077,74 @@
     return result.join('\n').replace(/\n{3,}/g, '\n\n').trim();
   }
 
+
+  /* ------------------------------------------------------------------ */
+  /* Cover letter (deterministic draft)                                 */
   /* ------------------------------------------------------------------ */
 
-  return { analyze, tailor, WEIGHTS, _internals: { parseResume, parseJd, analyzeBullet, hasMetric, stem, jdYears, parseRange, unionMonths, normalizeText, SKILLS } };
+  function coverLetter(r, opts) {
+    opts = opts || {};
+    const company = (opts.company || '').trim() || '[COMPANY]';
+    const manager = (opts.hiringManager || '').trim();
+    const header = r._parsed.sections[0].lines.map((l) => l.trim()).filter(Boolean);
+    const name = (opts.name || '').trim() || (header[0] && header[0].split(/\s+/).length <= 4 && !/[@\d]/.test(header[0]) ? header[0] : '[YOUR NAME]');
+    const title = r.jd.title ? titleCase(r.jd.title) : 'open';
+    const have = r.keywords.matched.concat(r.keywords.partial);
+    const nonSoft = have.filter((k) => k.category !== 'soft');
+    const name_of = (k) => (k.jdForm ? matchCase(k.jdForm, k.jdForm) : k.term);
+    const topSkills = nonSoft.slice(0, 3).map(name_of);
+    const yrs = Math.floor(r.resume.years);
+    const list = (a) => (a.length > 2 ? a.slice(0, -1).join(', ') + ', and ' + a[a.length - 1] : a.join(' and '));
+
+    const out = [];
+    out.push(manager ? 'Dear ' + manager + ',' : 'Dear Hiring Manager,');
+    out.push('');
+    out.push('I am writing to apply for the ' + title + ' role at ' + company + '. ' +
+      (yrs >= 1 ? 'With ' + yrs + '+ years of experience' : 'With my experience') + (topSkills.length ? ' in ' + list(topSkills) : '') +
+      ', I am confident I can contribute quickly. [ADD ONE SPECIFIC SENTENCE ON WHY THIS COMPANY: a product, mission or recent news you genuinely care about.]');
+
+    // Proof: best quantified bullets, most relevant to the job
+    const proof = r.bullets.filter((b) => b.metric && b.hasVerb)
+      .map((b) => ({ b, s: relevance(b.text, r) })).sort((a, b) => b.s - a.s).slice(0, 3).map((x) => x.b);
+    const fallback = proof.length ? [] : r.bullets.map((b) => ({ b, s: relevance(b.text, r) })).sort((a, b) => b.s - a.s).slice(0, 2).map((x) => x.b);
+    const used = proof.concat(fallback);
+    if (used.length) {
+      out.push('');
+      out.push('A few highlights that map to what you are looking for:');
+      used.forEach((b) => {
+        const t = normalizeToJdWording(b.text, r).replace(/[.;]+$/, '');
+        out.push('• ' + t + (b.metric ? '' : ' [ADD A RESULT]'));
+      });
+    }
+
+    const req = have.filter((k) => k.level === 'required' && k.category !== 'soft').slice(0, 5).map(name_of);
+    if (req.length) {
+      out.push('');
+      out.push('Your posting emphasises ' + list(req) + '. These are tools I have used in my day-to-day work, and I would bring that hands-on experience from day one.');
+    }
+
+    // Honest gap handling: bridge when we can prove it, otherwise leave a clearly marked optional line
+    const gaps = r.keywords.gaps.filter((g) => g.level === 'required' && g.category !== 'soft').slice(0, 2);
+    if (gaps.length) {
+      const bridged = gaps.filter((g) => g.bridge);
+      const unbridged = gaps.filter((g) => !g.bridge);
+      const lines = [];
+      bridged.forEach((g) => lines.push('Although my hands-on background is in ' + g.bridge + ' rather than ' + g.term + ', the underlying concepts carry over, and I pick up new tools quickly. [ADD AN EXAMPLE OF LEARNING SOMETHING FAST, if true]'));
+      if (unbridged.length) lines.push('[ONLY IF TRUE: I am currently building experience with ' + list(unbridged.map((g) => g.term)) + ' through <course/project>.]');
+      out.push('');
+      out.push(lines.join(' '));
+    }
+
+    out.push('');
+    out.push('I would welcome the chance to discuss how I can help ' + (company === '[COMPANY]' ? 'your team' : company) + '. Thank you for your time and consideration.');
+    out.push('');
+    out.push('Sincerely,');
+    out.push(name);
+    const text = out.join('\n');
+    return { text, placeholders: (text.match(/\[[A-Z][^\]]*\]/g) || []).length };
+  }
+
+  /* ------------------------------------------------------------------ */
+
+  return { analyze, tailor, coverLetter, WEIGHTS, _internals: { parseResume, parseJd, analyzeBullet, hasMetric, stem, jdYears, parseRange, unionMonths, normalizeText, SKILLS } };
 });

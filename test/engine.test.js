@@ -102,3 +102,15 @@ test('handles empty / tiny input without throwing', () => {
   assert.doesNotThrow(() => JM.analyze('hello', 'world', { now: NOW }));
   assert.doesNotThrow(() => JM.tailor(JM.analyze('hello', 'We need a python developer. Python required.', { now: NOW })));
 });
+
+test('coverLetter uses real achievements, never claims missing skills, marks placeholders', () => {
+  const r = run();
+  const c = JM.coverLetter(r, { company: 'Example Co', hiringManager: 'Sam Lee' });
+  assert.ok(/^Dear Sam Lee,/.test(c.text));
+  assert.ok(/Senior Full-Stack Engineer role at Example Co/.test(c.text));
+  assert.ok(/cut report generation time from 40s to 6s/i.test(c.text), 'quotes a real metric bullet');
+  assert.ok(/Alex Morgan$/.test(c.text.trim()));
+  assert.ok(/\[ONLY IF TRUE/.test(c.text) && c.placeholders >= 2);
+  assert.ok(!/I (have|am) (experienced|proficient)[^.]*(Kubernetes|TypeScript)/i.test(c.text));
+  assert.doesNotThrow(() => JM.coverLetter(JM.analyze('hi', 'python dev', { now: NOW })));
+});

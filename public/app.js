@@ -20,6 +20,8 @@
   let aiAvailable = false;
   let tailored = null;      // cached tailored output for the current analysis
   let aiDraft = null;
+  let aiCover = null;
+  let coverOpts = { hiringManager: '', name: '' };
 
   /* ---------------- helpers ---------------- */
   const tone = (n) => (n >= 80 ? 'good' : n >= 65 ? 'ok' : n >= 50 ? 'warn' : 'bad');
@@ -106,7 +108,7 @@
     setMsg('', false);
     currentInput = { resume, jd, title: el.title.value.trim(), company: el.company.value.trim() };
     current = JM.analyze(resume, jd, { jobTitle: currentInput.title });
-    tailored = null; aiDraft = null;
+    tailored = null; aiDraft = null; aiCover = null;
     persist();
     renderSummary();
     el.results.hidden = false;
@@ -119,7 +121,7 @@
     const r = current;
     $('#scoreNum').textContent = r.score;
     const fg = $('#ringFg'); const C = 2 * Math.PI * 52;
-    fg.style.stroke = 'var(--' + (tone(r.score) === 'ok' ? 'ok' : tone(r.score)) + ')';
+    fg.style.stroke = r.score >= 65 ? 'url(#ringGrad)' : 'var(--' + tone(r.score) + ')';
     fg.style.strokeDashoffset = C; requestAnimationFrame(() => requestAnimationFrame(() => { fg.style.strokeDashoffset = C * (1 - r.score / 100); }));
     $('#verdict').textContent = r.verdict.label;
     $('#verdict').style.color = 'var(--' + (r.verdict.tone === 'ok' ? 'ok' : r.verdict.tone) + ')';
@@ -146,7 +148,7 @@
   function setTab(name) {
     activeTab = name;
     $$('.tab').forEach((t) => { const on = t.dataset.tab === name; t.classList.toggle('active', on); t.setAttribute('aria-selected', on); });
-    const fn = { plan: tabPlan, keywords: tabKeywords, gaps: tabGaps, bullets: tabBullets, ats: tabAts, tailor: tabTailor }[name];
+    const fn = { plan: tabPlan, keywords: tabKeywords, gaps: tabGaps, bullets: tabBullets, ats: tabAts, tailor: tabTailor, cover: tabCover }[name];
     el.tabpanel.innerHTML = ''; fn();
   }
 
@@ -242,6 +244,29 @@
     const at = $('#aiTailor'); if (at) at.onclick = aiRewriteResume;
   }
 
+
+  function tabCover() {
+    const gen = () => (aiCover || JM.coverLetter(current, { company: currentInput.company, hiringManager: coverOpts.hiringManager, name: coverOpts.name }).text);
+    el.tabpanel.innerHTML = '<div class="tailor"><p class="legend">A cover letter built from your real, quantified achievements and the skills you actually match. Gaps are never claimed: they are bridged from related experience or left as clearly marked <b>[ONLY IF TRUE]</b> lines. Fill every bracketed placeholder, and add one sentence on why you want this company.</p>' +
+      '<div class="two"><input id="clMgr" type="text" placeholder="Hiring manager name (optional)" value="' + esc(coverOpts.hiringManager) + '" aria-label="Hiring manager"><input id="clName" type="text" placeholder="Your name (auto-detected)" value="' + esc(coverOpts.name) + '" aria-label="Your name"></div>' +
+      '<div class="tailor-bar"><button class="btn small primary" id="clGen">Regenerate</button><button class="btn small" id="clCopy">Copy</button><button class="btn small" id="clTxt">Download .txt</button><button class="btn small" id="clDoc">Download .doc</button>' +
+      (aiAvailable ? '<button class="btn small ghost" id="clAi">Write with AI ✦</button>' : '') + '<span class="grow"></span><span class="pill" id="clCount"></span></div><textarea id="clText" spellcheck="false" style="min-height:420px"></textarea></div>';
+    const ta = $('#clText'); ta.value = gen();
+    const count = () => { const n = (ta.value.match(/\[[A-Z][^\]]*\]/g) || []).length; $('#clCount').textContent = n ? n + ' placeholder' + (n > 1 ? 's' : '') + ' to fill' : 'no placeholders left'; };
+    count(); ta.addEventListener('input', count);
+    $('#clGen').onclick = () => { coverOpts = { hiringManager: $('#clMgr').value, name: $('#clName').value }; aiCover = null; ta.value = gen(); count(); };
+    $('#clCopy').onclick = async () => { try { await navigator.clipboard.writeText(ta.value); toast('Copied'); } catch (e) { ta.select(); document.execCommand('copy'); toast('Copied'); } };
+    $('#clTxt').onclick = () => download('cover-letter.txt', ta.value);
+    $('#clDoc').onclick = () => download('cover-letter.doc', '<html><head><meta charset="utf-8"></head><body style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">' + esc(ta.value) + '</body></html>', 'application/msword');
+    const ai = $('#clAi');
+    if (ai) ai.onclick = async () => {
+      if (!confirm('This sends your resume and the job description to the Anthropic API to write the letter. Continue?')) return;
+      ai.disabled = true; ai.textContent = 'Writing…';
+      try { aiCover = await aiCall('cover'); ta.value = aiCover; count(); toast('AI letter ready. Check every claim.'); } catch (e) { toast(e.message); }
+      ai.disabled = false; ai.textContent = 'Write with AI ✦';
+    };
+  }
+
   /* ---------------- AI (optional) ---------------- */
   async function aiCall(task, extra) {
     const matched = current.keywords.matched.concat(current.keywords.partial).map((k) => k.term);
@@ -333,6 +358,12 @@
   [el.resume, el.jd, el.title, el.company].forEach((x) => x.addEventListener('input', () => { updateHints(); persist(); }));
   document.addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && !$('#view-analyze').hidden) run(); });
   wireFile('#resumeFile', el.resume); wireFile('#jdFile', el.jd);
+
+  $('#themeBtn').addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('jm:theme', next); } catch (e) { /* ignore */ }
+  });
 
   // init
   el.resume.value = store.get('resume', '');

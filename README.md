@@ -4,6 +4,7 @@ Upload a job description and your resume. Job Matcher tells you **how well you f
 
 - Runs entirely in your browser. Your resume is never uploaded anywhere (the optional AI button is the only exception, and it asks first).
 - Zero dependencies. Needs only Node 18+.
+- Day / night theme (glass-and-glow violet UI), switchable with the sun/moon toggle; follows your system setting by default and remembers your choice.
 
 ## Run it
 
@@ -13,7 +14,7 @@ npm start            # http://localhost:3000
 npm test             # engine tests
 ```
 
-Optional AI rewrite (resume rewrite + XYZ bullet rewrite), off by default:
+Optional AI rewrite (resume, XYZ bullet and cover letter rewrite), off by default:
 
 ```bash
 ANTHROPIC_API_KEY=sk-... npm start     # model defaults to claude-sonnet-5-5; override with JOBMATCHER_MODEL
@@ -30,6 +31,7 @@ ANTHROPIC_API_KEY=sk-... npm start     # model defaults to claude-sonnet-5-5; ov
 | **Bullets (XYZ)** | Scores every bullet on action verb, measurable result, and method (Google's XYZ formula: *Accomplished [X] as measured by [Y], by doing [Z]*), with a fill-in-the-blank rewrite for each weak one. |
 | **ATS check** | Contact info, standard headings, dates, columns/tables, odd glyphs, pronouns, length, bullets. |
 | **Tailored resume** | A draft built only from your own content: summary rebuilt around the role, skills re-worded to the posting's exact terms, bullets ordered by relevance, `[ADD METRIC]` placeholders where numbers are missing. Edit, then **Re-score** in one click. Export as .txt / .doc / print to PDF. |
+| **Cover letter** | Generates a letter from your real quantified wins and matched skills. Gaps are bridged from related experience or left as `[ONLY IF TRUE]` lines, never claimed. Optional AI rewrite. |
 | **My jobs** | Save each posting with its score and an application status (Saved → Applied → Interviewing → Offer / Rejected). Stored in your browser. |
 
 ## How the score works
@@ -67,4 +69,4 @@ PDF/DOCX import loads `pdf.js` and `mammoth` from cdnjs the first time you uploa
 
 ## Ideas for later
 
-Per-skill years ("3+ years of Kubernetes"), a cover-letter generator, multi-resume versions, browser extension to grab a posting from a job site, and a larger skills taxonomy per industry (edit `public/engine/skills.js`).
+Per-skill years ("3+ years of Kubernetes"), multi-resume versions, browser extension to grab a posting from a job site, and a larger skills taxonomy per industry (edit `public/engine/skills.js`).
