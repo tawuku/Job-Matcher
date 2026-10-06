@@ -4,7 +4,8 @@ Upload a job description and your resume. Job Matcher tells you **how well you f
 
 - Runs entirely in your browser. Your resume is never uploaded anywhere (the optional AI button is the only exception, and it asks first).
 - Zero dependencies. Needs only Node 18+.
-- Day / night theme (glass-and-glow violet UI), switchable with the sun/moon toggle; follows your system setting by default and remembers your choice.
+- Import your resume or the job posting by **pasting text**, **uploading** or **dragging & dropping** a **PDF**, **Word (.docx)** or text file. (Old `.doc` files: save as .docx or PDF first. Scanned/image PDFs have no text; export a text PDF.)
+- Day / night theme and five accent palettes (mint, sky, violet, coral, lime), switchable in the top bar. Your choices are remembered.
 
 ## Run it
 
@@ -24,15 +25,14 @@ ANTHROPIC_API_KEY=sk-... npm start     # model defaults to claude-sonnet-5-5; ov
 
 | Tab | What it does |
 |---|---|
-| **Match score** | 0-100 score with a 7-part breakdown, a verdict, an ATS pass likelihood, and a "potential score" after honest fixes. |
-| **Action plan** | Prioritised to-do list (critical → low) with estimated point gain and effort for each item. |
+| **Overview** | Match score, verdict, ATS pass likelihood and "potential score", a 7-part breakdown, and your **path to the interview**: a timeline of prioritised fixes (fix first → before you submit) with the estimated point gain and effort of each. |
 | **Keywords** | Required / core / preferred job skills split into matched, *skills-list only* (weaker), and missing. Also finds repeated phrases outside the skills taxonomy. |
-| **Gaps** | For every missing skill, an honest way to close it, or to bridge it from a related skill you already have (e.g. Azure → AWS). |
-| **Bullets (XYZ)** | Scores every bullet on action verb, measurable result, and method (Google's XYZ formula: *Accomplished [X] as measured by [Y], by doing [Z]*), with a fill-in-the-blank rewrite for each weak one. |
+Filter chips include **How to close gaps**: for every missing skill, an honest way to close it, or to bridge it from a related skill you already have (e.g. Azure → AWS). |
+| **Bullets** | Scores every bullet on action verb, measurable result, and method (Google's XYZ formula: *Accomplished [X] as measured by [Y], by doing [Z]*), with a fill-in-the-blank rewrite for each weak one. |
 | **ATS check** | Contact info, standard headings, dates, columns/tables, odd glyphs, pronouns, length, bullets. |
-| **Tailored resume** | A draft built only from your own content: summary rebuilt around the role, skills re-worded to the posting's exact terms, bullets ordered by relevance, `[ADD METRIC]` placeholders where numbers are missing. Edit, then **Re-score** in one click. Export as .txt / .doc / print to PDF. |
+| **Resume** | A draft built only from your own content: summary rebuilt around the role, skills re-worded to the posting's exact terms, bullets ordered by relevance, `[ADD METRIC]` placeholders where numbers are missing. Edit, then **Re-score** in one click. Export as .txt / .doc / print to PDF. |
 | **Cover letter** | Generates a letter from your real quantified wins and matched skills. Gaps are bridged from related experience or left as `[ONLY IF TRUE]` lines, never claimed. Optional AI rewrite. |
-| **My jobs** | Save each posting with its score and an application status (Saved → Applied → Interviewing → Offer / Rejected). Stored in your browser. |
+| **My jobs** | Save each posting with its score and an application status (Saved → Applied → Interviewing → Offer / Rejected). Saved jobs also sit in the dock at the bottom for one-click re-analysis. Stored in your browser. |
 
 ## How the score works
 

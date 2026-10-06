@@ -347,11 +347,15 @@
       let role = { header: '', headerLines: [], dates: '', section: sec.name, bullets: [] };
       roles.push(role);
       let prev = '';
+      let lastB = null;
       for (const raw of sec.lines) {
         const line = raw.trim();
         if (!line) continue;
         const isBullet = BULLET_RE.test(raw);
         const range = !isBullet ? parseRange(line, now) : null;
+        // A bullet that wraps onto the next line (typical in PDFs): glue the continuation back on.
+        if (lastB && !isBullet && !range && /^(\s{2,}\S|[a-z0-9%$(&])/.test(raw)) { lastB.text += ' ' + line; prev = line; continue; }
+        if (range || isBullet === false) lastB = null;
         if (range && line.length < 140) {
           const rest = line.replace(range.text, ' ').replace(/[|,·•\-–—()\s]+$/g, '').replace(/^[|,·•\-–—()\s]+/g, '').trim();
           const headerLines = [];
@@ -374,6 +378,7 @@
           const b = { text: raw.replace(BULLET_RE, '').trim(), role, section: sec.name, kind: 'bullet' };
           role.bullets.push(b);
           bullets.push(b);
+          lastB = b;
         } else if (line.split(/\s+/).length >= 11 && /[.;]$|,/.test(line)) {
           const b = { text: line, role, section: sec.name, kind: 'paragraph' };
           role.bullets.push(b);
@@ -1059,7 +1064,7 @@
       const raw = lines[i];
       if (BULLET_RE.test(raw)) {
         const run = [];
-        while (i < lines.length && (BULLET_RE.test(lines[i]) || (/^\s{2,}\S/.test(lines[i]) && run.length))) {
+        while (i < lines.length && (BULLET_RE.test(lines[i]) || ((/^\s{2,}\S/.test(lines[i]) || /^[a-z0-9%$(&]/.test(lines[i])) && run.length))) {
           if (BULLET_RE.test(lines[i])) run.push(lines[i].replace(BULLET_RE, '').trim());
           else run[run.length - 1] += ' ' + lines[i].trim();
           i++;

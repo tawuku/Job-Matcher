@@ -114,3 +114,14 @@ test('coverLetter uses real achievements, never claims missing skills, marks pla
   assert.ok(!/I (have|am) (experienced|proficient)[^.]*(Kubernetes|TypeScript)/i.test(c.text));
   assert.doesNotThrow(() => JM.coverLetter(JM.analyze('hi', 'python dev', { now: NOW })));
 });
+
+test('wrapped bullet lines (typical of PDF text) are joined so metrics are not lost', () => {
+  const pdfLike = 'Alex\nalex@example.com\n\nEXPERIENCE\nDev, Acme\nMar 2020 - Present\n- Built a reporting module using React that cut report time\nfrom 40s to 6s\n- Led a team of 5 engineers\n\nEDUCATION\nB.S. CS, 2018\n';
+  const p = JM._internals.parseResume(pdfLike, new Date(NOW));
+  assert.equal(p.bullets.length, 2);
+  assert.ok(/40s to 6s/.test(p.bullets[0].text));
+  // a role header line after a bullet must NOT be glued on
+  const two = 'EXPERIENCE\nDev, A\nJan 2021 - Dec 2022\n- Built x for 10 users\nSenior Dev, B\nJan 2023 - Present\n- Built y\n';
+  const q = JM._internals.parseResume(two, new Date(NOW));
+  assert.equal(q.roles.filter((r) => r.header).length, 2);
+});

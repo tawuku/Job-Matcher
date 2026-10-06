@@ -5,137 +5,144 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Job Matcher</title>
   <meta name="description" content="Match your resume to a job description, see how well you fit, and get an ATS-aware plan to land the interview.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M9 17l5 5 9-12' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='10' fill='%237ef0c8'/%3E%3Cpath d='M9 17l5 5 9-12' stroke='%230b2a21' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script>
     (function () { var t = null; try { t = localStorage.getItem('jm:theme'); } catch (e) {}
-      if (t !== 'light' && t !== 'dark') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', t); })();
+      if (t !== 'light' && t !== 'dark') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+      var a = null; try { a = localStorage.getItem('jm:accent'); } catch (e) {}
+      document.documentElement.setAttribute('data-accent', ['lime','mint','sky','violet','coral'].indexOf(a) > -1 ? a : 'mint'); })();
   </script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="top">
-    <div class="wrap top-in">
-      <a class="brand" href="#analyze" aria-label="Job Matcher home">
-        <span class="logo" aria-hidden="true"><svg viewBox="0 0 32 32" width="22" height="22"><path d="M9 17l5 5 9-12" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <span class="name">Job Matcher</span>
-      </a>
-      <div class="top-r">
-      <nav class="nav" aria-label="Main">
-        <button class="nav-btn active" data-view="analyze">Analyze</button>
-        <button class="nav-btn" data-view="jobs">My jobs <span class="pill" id="jobCount">0</span></button>
-      </nav>
+<div class="stage">
+  <div class="frame">
+
+    <!-- Top bar: close + title tab (merges into the panel) + pill navigation -->
+    <div class="frame-top">
+      <div class="title-tab">
+        <button class="close" id="homeBtn" type="button" aria-label="Back to start" title="Back to start">×</button>
+        <h1 id="pageTitle">Job Matcher</h1>
+      </div>
+      <nav class="pills" id="pills" aria-label="Sections"></nav>
+      <div class="swatches" id="swatches" role="group" aria-label="Accent color">
+        <button class="sw" data-a="mint" style="--c:#7ef0c8" aria-label="Mint" title="Mint"></button>
+        <button class="sw" data-a="sky" style="--c:#8fd3ff" aria-label="Sky" title="Sky"></button>
+        <button class="sw" data-a="violet" style="--c:#c4b5fd" aria-label="Violet" title="Violet"></button>
+        <button class="sw" data-a="coral" style="--c:#ff9f80" aria-label="Coral" title="Coral"></button>
+        <button class="sw" data-a="lime" style="--c:#f2ff4b" aria-label="Lime" title="Lime"></button>
+      </div>
       <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch between day and night theme" title="Day / night">
         <span class="knob">
           <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>
           <svg class="moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a.6.6 0 0 0-.8-.7A9.5 9.5 0 1 0 21.2 15a.6.6 0 0 0-.7-.8z"/></svg>
         </span>
       </button>
-      </div>
     </div>
-  </header>
 
-  <main class="wrap">
-    <!-- ===================== ANALYZE ===================== -->
-    <section id="view-analyze" class="view">
-      <div class="hero">
-        <h1>Will this resume get you the interview?</h1>
-        <p>Paste a job description and your resume. You get a match score, the exact keywords and metrics you are missing, and a plan built on how ATS software and recruiters actually screen. Everything is calculated in your browser.</p>
-      </div>
+    <main class="panel" id="panel">
 
-      <div class="inputs">
-        <div class="card">
-          <div class="card-h">
-            <label for="resume"><span class="step">1</span> Your resume</label>
-            <div class="row">
-              <label class="btn small ghost file-btn">Upload <input id="resumeFile" type="file" accept=".txt,.md,.pdf,.docx" hidden></label>
-            </div>
-          </div>
-          <textarea id="resume" spellcheck="false" placeholder="Paste your resume text here, or upload a PDF / DOCX / TXT. Include dates for each role and bullet points for achievements."></textarea>
-          <div class="hint" id="resumeHint">0 words</div>
+      <!-- ============ ANALYZE (input) ============ -->
+      <section id="view-analyze" class="view">
+        <div class="intro">
+          <h2>Will this resume get you the interview?</h2>
+          <p>Add a job description and your resume. Paste text, or drop a <b>PDF</b> or <b>Word</b> file. You get a match score, the exact keywords and metrics you are missing, and a plan built on how ATS software and recruiters screen. Everything is calculated in your browser.</p>
         </div>
 
-        <div class="card">
-          <div class="card-h">
-            <label for="jd"><span class="step">2</span> Job description</label>
-            <div class="row">
-              <label class="btn small ghost file-btn">Upload <input id="jdFile" type="file" accept=".txt,.md,.pdf,.docx" hidden></label>
+        <div class="inputs">
+          <div class="tile drop" id="drop-resume">
+            <div class="tile-h">
+              <label for="resume"><span class="step">1</span> Your resume</label>
+              <label class="btn small file-btn" title="PDF, Word (.docx) or text">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>
+                Upload
+                <input id="resumeFile" type="file" accept=".pdf,.docx,.doc,.txt,.md,.text,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden>
+              </label>
+            </div>
+            <div class="filechip" id="resumeChip" hidden></div>
+            <textarea id="resume" spellcheck="false" placeholder="Paste your resume text here, or drop a PDF / Word file anywhere on this card.&#10;&#10;Include dates for each role and bullet points for achievements."></textarea>
+            <div class="hint"><span id="resumeHint">0 words</span><span>PDF · DOCX · TXT</span></div>
+            <div class="drop-overlay" aria-hidden="true"><b>Drop to import</b><span>PDF, Word (.docx) or text</span></div>
+          </div>
+
+          <div class="tile drop" id="drop-jd">
+            <div class="tile-h">
+              <label for="jd"><span class="step">2</span> Job description</label>
+              <label class="btn small file-btn" title="PDF, Word (.docx) or text">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>
+                Upload
+                <input id="jdFile" type="file" accept=".pdf,.docx,.doc,.txt,.md,.text,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden>
+              </label>
+            </div>
+            <div class="two">
+              <input id="jobTitle" type="text" placeholder="Job title (optional, auto-detected)" aria-label="Job title">
+              <input id="company" type="text" placeholder="Company (optional)" aria-label="Company">
+            </div>
+            <div class="filechip" id="jdChip" hidden></div>
+            <textarea id="jd" spellcheck="false" placeholder="Paste the full job posting here, or drop a PDF / Word file on this card.&#10;&#10;Include responsibilities, requirements and nice-to-haves."></textarea>
+            <div class="hint"><span id="jdHint">0 words</span><span>PDF · DOCX · TXT</span></div>
+            <div class="drop-overlay" aria-hidden="true"><b>Drop to import</b><span>PDF, Word (.docx) or text</span></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary big" id="analyzeBtn">Analyze match</button>
+          <button class="btn" id="sampleBtn">Try a sample</button>
+          <button class="btn ghost" id="clearBtn">Clear</button>
+          <span class="msg" id="inputMsg" role="status"></span>
+        </div>
+      </section>
+
+      <!-- ============ RESULTS ============ -->
+      <section id="view-results" class="view" hidden>
+        <div class="hero-row">
+          <div class="profile">
+            <div class="avatar" id="avatar" style="--p:0"><span id="avatarTxt">AM</span></div>
+            <div class="profile-t">
+              <small id="profSub">Candidate</small>
+              <b id="profName">Your resume</b>
             </div>
           </div>
-          <div class="two">
-            <input id="jobTitle" type="text" placeholder="Job title (optional, auto-detected)" aria-label="Job title">
-            <input id="company" type="text" placeholder="Company (optional)" aria-label="Company">
-          </div>
-          <textarea id="jd" spellcheck="false" placeholder="Paste the full job posting here: responsibilities, requirements and nice-to-haves. The more complete, the better the match."></textarea>
-          <div class="hint" id="jdHint">0 words</div>
+          <div class="statrow" id="statrow"></div>
         </div>
-      </div>
 
-      <div class="actions">
-        <button class="btn primary big" id="analyzeBtn">Analyze match</button>
-        <button class="btn ghost" id="sampleBtn">Try a sample</button>
-        <button class="btn ghost" id="clearBtn">Clear</button>
-        <span class="msg" id="inputMsg" role="status"></span>
-      </div>
-
-      <div id="results" hidden>
-        <section class="summary card" aria-live="polite">
-          <div class="ring-wrap">
-            <svg class="ring" viewBox="0 0 120 120" role="img" aria-label="Match score"><defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b5cf6"/><stop offset=".6" stop-color="#d946ef"/><stop offset="1" stop-color="#f97316"/></linearGradient></defs>
-              <circle cx="60" cy="60" r="52" class="ring-bg"/>
-              <circle cx="60" cy="60" r="52" class="ring-fg" id="ringFg" transform="rotate(-90 60 60)"/>
-            </svg>
-            <div class="ring-num"><b id="scoreNum">0</b><span>/100</span></div>
+        <div class="toolbar">
+          <div class="chips" id="chipbar" aria-label="Filters"></div>
+          <div class="tool-r">
+            <button class="btn small" id="saveJobBtn">Save to My jobs</button>
           </div>
-          <div class="sum-body">
-            <div class="verdict" id="verdict"></div>
-            <p class="verdict-text" id="verdictText"></p>
-            <div class="chips" id="chips"></div>
-            <div class="sum-actions">
-              <button class="btn small" id="saveJobBtn">Save to My jobs</button>
-              <button class="btn small ghost" id="toPlanBtn">See what to fix ↓</button>
-            </div>
-          </div>
-          <div class="potential" id="potential"></div>
-        </section>
-
-        <section class="card">
-          <h2 class="h2">Score breakdown</h2>
-          <div id="bars" class="bars"></div>
-        </section>
-
-        <div class="tabs" role="tablist" id="tabs">
-          <button role="tab" class="tab active" data-tab="plan">Action plan</button>
-          <button role="tab" class="tab" data-tab="keywords">Keywords</button>
-          <button role="tab" class="tab" data-tab="gaps">Gaps</button>
-          <button role="tab" class="tab" data-tab="bullets">Bullets (XYZ)</button>
-          <button role="tab" class="tab" data-tab="ats">ATS check</button>
-          <button role="tab" class="tab" data-tab="tailor">Tailored resume</button>
-          <button role="tab" class="tab" data-tab="cover">Cover letter</button>
         </div>
-        <div id="tabpanel" class="card tabpanel" role="tabpanel"></div>
-      </div>
-    </section>
 
-    <!-- ===================== JOBS ===================== -->
-    <section id="view-jobs" class="view" hidden>
-      <div class="hero">
-        <h1>My jobs</h1>
-        <p>Every posting you save, scored against your current resume. Re-open one to re-analyze after you improve your resume. Data stays in this browser.</p>
-      </div>
-      <div class="card" id="jobsList"></div>
-    </section>
-  </main>
+        <div id="content" class="content" aria-live="polite"></div>
+      </section>
 
-  <footer class="wrap foot">
-    <p>Scores are an estimate based on common ATS and recruiter screening signals, not a guarantee. Real ATS products differ. Be honest on your resume: only claim what you can back up in an interview.</p>
-  </footer>
+      <!-- ============ MY JOBS ============ -->
+      <section id="view-jobs" class="view" hidden>
+        <div class="intro">
+          <h2>My jobs</h2>
+          <p>Every posting you save, scored against your current resume. Re-open one to re-analyze after you improve your resume. Data stays in this browser.</p>
+        </div>
+        <div class="tile" id="jobsList"></div>
+      </section>
 
-  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+      <p class="foot">Scores are an estimate based on common ATS and recruiter screening signals, not a guarantee. Real ATS products differ. Only claim what you can back up in an interview.</p>
+    </main>
 
-  <script src="engine/skills.js"></script>
-  <script src="engine/engine.js"></script>
-  <script src="engine/samples.js"></script>
-  <script src="app.js"></script>
+    <!-- Dock: saved jobs timeline -->
+    <div class="dock" id="dock" aria-label="Saved jobs"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div id="printSheet"></div>
+
+<script src="engine/skills.js"></script>
+<script src="engine/engine.js"></script>
+<script src="engine/samples.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
